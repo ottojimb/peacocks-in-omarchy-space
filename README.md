@@ -20,11 +20,12 @@ cd peacocks-in-omarchy-space && ./install.sh
 omarchy-theme-set peacocks-in-space
 ```
 
-`install.sh` symlinks each theme into `~/.config/omarchy/themes`. Omarchy honours
-`neovim.lua` (Rainglow syntax in Neovim) and `vscode.json` (the Rainglow VS Code theme) only
-for symlinked themes.
+`install.sh` symlinks each theme into `~/.config/omarchy/themes`. Omarchy honours Lua files,
+terminal configs and `vscode.json` only for symlinked themes, so only this install gets the
+blur, the translucent terminal, Rainglow's syntax in Neovim and the Rainglow VS Code theme.
 
-One variant through Omarchy's installer, without those two files:
+One variant through Omarchy's installer, with the palette, borders, wallpapers and translucent
+shell surfaces (no blur):
 
 ```bash
 omarchy theme install https://github.com/ottojimb/omarchy-peacocks-in-space-theme
@@ -38,6 +39,8 @@ omarchy theme install https://github.com/ottojimb/omarchy-peacocks-in-space-them
   gold and violet come from its git and notification colors and the blue is derived.
 - **Neovim**: aether with Rainglow's syntax roles (teal keywords, lime strings and
   functions, orange types and literals).
+- **Frosted glass**: Hyprland blur on, terminal backgrounds at 85 % (text stays opaque),
+  bar, launcher, menus and notifications at 75 %. Light uses 92 % and 85 %.
 - **Light**: text colors are darkened to stay readable on `#dee3ec`; borders keep the
   vivid accents.
 
