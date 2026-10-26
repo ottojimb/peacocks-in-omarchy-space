@@ -49,12 +49,13 @@ omarchy theme install https://github.com/ottojimb/omarchy-peacocks-in-space-them
 All colors live in `generate.py`.
 
 ```bash
-python3 generate.py           # theme files, README.md and LICENSE per theme
-python3 generate.py --assets  # also wallpapers and preview.png (Chrome + Pillow)
+python3 generate.py           # theme files, README.md, LICENSE and preview.png per theme
+python3 generate.py --assets  # also wallpapers (Chrome + Pillow)
 ```
 
-Wallpapers and previews are drawn by `render/wallpaper.html` and `render/preview.html`
-in headless Chrome.
+Wallpapers are drawn by `render/wallpaper.html` in headless Chrome. Each `preview.png`
+comes from the real desktop shot in `screenshots/<theme>.png` (16:9); without one,
+`render/preview.html` draws a mockup instead.
 
 ## Publish
 

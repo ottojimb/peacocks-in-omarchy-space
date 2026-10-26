@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 """Build the Peacocks in Space themes for Omarchy from a single palette.
 
-    python3 generate.py           write the theme files
-    python3 generate.py --assets  also render wallpapers and preview.png
+    python3 generate.py           write the theme files; preview.png from screenshots/
+    python3 generate.py --assets  also render wallpapers, and a mockup preview.png for
+                                  themes without a screenshot
                                   (needs google-chrome-stable or chromium, and Pillow)
 
 Source palettes: https://github.com/rainglow/vscode (peacocks-in-space*.json).
@@ -22,6 +23,7 @@ from string import Template
 ROOT = Path(__file__).resolve().parent
 THEMES_DIR = ROOT / "themes"
 RENDER_DIR = ROOT / "render"
+SCREENSHOTS_DIR = ROOT / "screenshots"  # real desktop shots, preferred over the rendered mockup
 
 # Rainglow accents shared by the three variants.
 TEAL = "#26a6a6"
@@ -578,6 +580,28 @@ def write_render_data(themes: dict) -> None:
     (RENDER_DIR / "themes.js").write_text(data)
 
 
+def save_preview(image, theme_id: str) -> None:
+    """preview.png at Omarchy's size, palette-reduced like the built-in themes."""
+    from PIL import Image
+
+    image = image.convert("RGB").resize((1800, 1012), Image.LANCZOS)
+    image.quantize(colors=256, dither=Image.Dither.FLOYDSTEINBERG).save(THEMES_DIR / theme_id / "preview.png", optimize=True)
+
+
+def preview_from_screenshot(theme_id: str) -> bool:
+    """Use screenshots/<id>.png as preview.png when it exists."""
+    shot = SCREENSHOTS_DIR / f"{theme_id}.png"
+    if not shot.exists():
+        return False
+    try:
+        from PIL import Image
+    except ImportError:
+        print(f"  {theme_id}: skipped preview.png (needs Pillow)")
+        return True
+    save_preview(Image.open(shot), theme_id)
+    return True
+
+
 def find_chrome() -> str:
     for name in ("google-chrome-stable", "google-chrome", "chromium", "chromium-browser"):
         path = shutil.which(name)
@@ -617,11 +641,12 @@ def render_assets() -> None:
                 Image.open(png).convert("RGB").save(backgrounds / f"{name}.jpg", quality=92, subsampling=0, optimize=True, progressive=True)
                 print(f"  {v['id']}/backgrounds/{name}.jpg")
 
+            if (SCREENSHOTS_DIR / f"{v['id']}.png").exists():
+                continue  # main() already built preview.png from the real screenshot
             png = tmp_path / f"{v['id']}-preview.png"
             screenshot(chrome, RENDER_DIR / "preview.html", f"theme={v['id']}", (1600, 900), png, profile, scale=1.125)
-            preview = Image.open(png).convert("RGB").resize((1800, 1012), Image.LANCZOS)
-            preview.quantize(colors=256, dither=Image.Dither.FLOYDSTEINBERG).save(THEMES_DIR / v["id"] / "preview.png", optimize=True)
-            print(f"  {v['id']}/preview.png")
+            save_preview(Image.open(png), v["id"])
+            print(f"  {v['id']}/preview.png (mockup)")
 
 
 def main() -> None:
@@ -641,6 +666,8 @@ def main() -> None:
             "background": f"../themes/{v['id']}/backgrounds/{WALLPAPERS[0][0]}.jpg",
         }
         print(f"  {v['id']}: colors, neovim, vscode, hyprland, terminals, shell overrides, README, LICENSE")
+        if preview_from_screenshot(v["id"]):
+            print(f"  {v['id']}/preview.png (screenshot)")
     write_render_data(render_data)
 
     if args.assets:
